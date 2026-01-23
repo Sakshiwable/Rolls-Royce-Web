@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "Rolls-Royce Cullinan",
+    "image": "/images/Rolls-Royce-Cullinan.jpg"
+  },
+  {
+    "id": 2,
+    "name": "Rolls-Royce Ghost",
+    "image": "/images/Rolls-Royce-Ghost.jpg"
+  },
+  {
+    "id": 3,
+    "name": "Rolls-Royce Phantom Drophead",
+    "image": "/images/Rolls-Royce-Phantom-Drophead.jpg"
+  },
+  {
+    "id": 4,
+    "name": "Rolls-Royce Phantom Extended",
+    "image": "/images/Rolls-Royce-Phantom-Extended.jpg"
+  }
+]
