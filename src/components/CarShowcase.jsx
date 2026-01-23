@@ -1,153 +1,165 @@
-import { motion, useMotionValue, useMotionTemplate } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useMotionTemplate,
+  useReducedMotion,
+} from "framer-motion";
+import { useEffect, useState } from "react";
 
+function CarShowcase({ cars = [] }) {
+  // duplicate for seamless scroll
+  const loopCars = [...cars, ...cars];
 
-function CarShowcase({ cars }) {
-    const loopCars = [...cars, ...cars];
+  const prefersReducedMotion = useReducedMotion();
 
-    const mouseX = useMotionValue(0);
-    const mouseY = useMotionValue(0);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
 
-    const handleMouseMove = (e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        mouseX.set(e.clientX - rect.left);
-        mouseY.set(e.clientY - rect.top);
-    };
+  const [isTouch, setIsTouch] = useState(false);
 
+  useEffect(() => {
+    setIsTouch(
+      typeof window !== "undefined" &&
+        ("ontouchstart" in window || navigator.maxTouchPoints > 0)
+    );
+  }, []);
 
-    return (
-        <section
-            id="collection"
-            onMouseMove={handleMouseMove}
-            className="relative h-screen w-screen overflow-hidden bg-black"
-        >
-            {/* Horizontal Scroll */}
-            <div
-                className="
+  const handlePointerMove = (e) => {
+    if (isTouch) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set(e.clientX - rect.left);
+    mouseY.set(e.clientY - rect.top);
+  };
+
+  return (
+    <section
+      id="collection"
+      onPointerMove={handlePointerMove}
+      className="
+        relative
+        min-h-[100svh] md:min-h-screen
+        w-screen
+        overflow-hidden
+        bg-black
+      "
+    >
+      {/* HORIZONTAL SCROLLER */}
+      <div
+        className="
           relative z-10
-          flex h-full w-full overflow-x-scroll
+          flex
+          min-h-[100svh]
+          w-full
+          overflow-x-auto
           snap-x snap-mandatory
-          scrollbar-hide scroll-smooth
+          scroll-smooth
+          scrollbar-hide
         "
-            >
-                {loopCars.map((car, index) => (
-                    <div
-                        key={index}
-                        className="snap-center min-w-full h-full relative"
-                    >
-                        {/* FULL SCREEN IMAGE */}
-                        <motion.img
-                            src={car.image}
-                            alt={car.name}
-                            initial={{ opacity: 0, scale: 1.02 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            transition={{
-                                duration: 2.6,
-                                ease: [0.16, 1, 0.3, 1],
-                            }}
-                            viewport={{ once: false }}
-                            className="
+      >
+        {loopCars.map((car, index) => (
+          <div
+            key={index}
+            className="
+              relative
+              snap-center
+              min-w-full
+              min-h-[100svh]
+            "
+          >
+            {/* BACKGROUND IMAGE */}
+            <motion.img
+              src={car.image}
+              alt={car.name}
+              loading="lazy"
+              initial={
+                prefersReducedMotion
+                  ? false
+                  : { opacity: 0, scale: 1.05 }
+              }
+              whileInView={
+                prefersReducedMotion
+                  ? { opacity: 1 }
+                  : { opacity: 1, scale: 1 }
+              }
+              transition={{ duration: 1.8, ease: "easeOut" }}
+              className="
                 absolute inset-0
                 w-full h-full
                 object-cover
-                z-0
               "
-                        />
+            />
 
-                        {/* MOUSE LIGHT SWEEP */}
-                        <motion.div
-                            className="absolute inset-0 z-15 pointer-events-none"
-                            style={{
-                                background: useMotionTemplate`
-      radial-gradient(
-        600px circle at ${mouseX}px ${mouseY}px,
-        rgba(255,255,255,0.12),
-        transparent 60%
-      )
-    `,
-                            }}
-                        />
+            {/* LIGHT SWEEP (DESKTOP ONLY) */}
+            {!isTouch && !prefersReducedMotion && (
+              <motion.div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: useMotionTemplate`
+                    radial-gradient(
+                      500px circle at ${mouseX}px ${mouseY}px,
+                      rgba(255,255,255,0.12),
+                      transparent 65%
+                    )
+                  `,
+                }}
+              />
+            )}
 
-
-                        {/* CINEMATIC OVERLAYS */}
-                        <div className="pointer-events-none absolute inset-0 z-10">
-                            {/* Fade */}
-                            <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-transparent to-black/85" />
-
-                            {/* Vertical light streaks */}
-                            <div
-                                className="
-                  absolute inset-0
-                  bg-[linear-gradient(90deg,rgba(255,255,255,0.035)_1px,transparent_1px)]
-                  bg-[size:140px_100%]
-                  opacity-40
-                "
-                            />
-                        </div>
-
-                        {/* GROUND FOG */}
-                        <div
-                            className="
-                absolute bottom-24 left-1/2 -translate-x-1/2
-                w-[75vw] h-36
-                bg-white/10 blur-[140px]
-                rounded-full
-                z-20
-              "
-                        />
-
-                        {/* CONTENT OVER IMAGE */}
-                        <div className="relative z-30 h-full flex flex-col items-center justify-end pb-28">
-
-                            {/* MODEL NAME */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 40 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 1.6, duration: 1.4 }}
-                                viewport={{ once: false }}
-                                className="text-center"
-                            >
-                                <h2
-                                    className="
-                    text-white
-                    text-xl md:text-2xl
-                    tracking-[0.5em]
-                    uppercase font-light
-                  "
-                                >
-                                    {car.name}
-                                </h2>
-
-                                <div
-                                    className="
-                    mx-auto mt-6
-                    h-[1px] w-32
-                    bg-gradient-to-r
-                    from-transparent via-white/60 to-transparent
-                  "
-                                />
-                            </motion.div>
-                        </div>
-                    </div>
-                ))}
+            {/* CINEMATIC OVERLAY */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
             </div>
 
-            {/* SCROLL INDICATOR (ON TOP OF IMAGE) */}
-            <motion.div
-                animate={{ opacity: [0.3, 0.7, 0.3] }}
-                transition={{ duration: 2.4, repeat: Infinity }}
-                className="
-          absolute bottom-6 w-full text-center
+            {/* TEXT CONTENT */}
+            <div className="relative z-20 h-full flex items-end justify-center pb-24">
+              <motion.div
+                initial={
+                  prefersReducedMotion
+                    ? false
+                    : { opacity: 0, y: 24 }
+                }
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1 }}
+                viewport={{ once: false }}
+                className="text-center"
+              >
+                <h2
+                  className="
+                    text-white
+                    text-lg md:text-2xl
+                    tracking-[0.4em]
+                    uppercase
+                  "
+                >
+                  {car.name}
+                </h2>
+
+                <div className="mx-auto mt-4 h-px w-24 bg-white/60" />
+              </motion.div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* SCROLL / SWIPE INDICATOR */}
+      <motion.div
+        animate={{ opacity: [0.3, 0.7, 0.3] }}
+        transition={{ duration: 2.2, repeat: Infinity }}
+        className="
+          absolute bottom-6 w-full
+          text-center
           text-white/40
-          tracking-[0.35em]
+          tracking-[0.3em]
           text-[10px]
           uppercase
-          z-40
+          z-30
         "
-            >
-                Scroll
-            </motion.div>
-        </section>
-    );
+      >
+        {isTouch ? "Swipe →" : "Scroll →"}
+      </motion.div>
+    </section>
+  );
 }
 
 export default CarShowcase;
